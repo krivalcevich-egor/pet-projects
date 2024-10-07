@@ -17,8 +17,7 @@ This interface is implemented for a resolution of 1680 by 1050 and 8-bit color d
 
 This module was tested on the ZYNQ Z-7000 FPGA, the results are presented below.
 
-<video controls src="img/VGA-test-on-ZYBO.mp4" title="
-"></video>
+![alt text](img/ezgif-6-eaf8065222.gif)
 
 # Timing diagram
 
