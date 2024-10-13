@@ -13,10 +13,6 @@ The adder with the accumulation register, upon receipt of the write_acc signal, 
 # Multiplier
 Multiplication, starting from the least significant digits of the multiplier, with a shift of the sum of partial products to the right with the multiplicand fixed.
 
-# In the future 
-
-The device operates in 20 cycles. In the future, it is necessary to reduce this indicator by improving the operation of the control device and preparing the multiplier data.
-
 # Timing diagram
 
 ![alt text](img/time.jpg)
