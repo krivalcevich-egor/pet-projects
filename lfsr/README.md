@@ -30,14 +30,25 @@ This device operates in 3 modes:
 
 # Tcl console
 Testing sync initialization: TestVector = 00000000
+
 Sync initialization successful: 00000000
+
 Testing sync initialization: TestVector = 12345678
+
 Sync initialization successful: 12345678
+
 Testing sync initialization: TestVector = 9abcdef0
+
 Sync initialization successful: 9abcdef0
+
 Testing sync initialization: TestVector = 12153524
+
 Sync initialization successful: 12153524
+
 Testing storage mode: RandomSeed = c0895e81
+
 Storage mode successful: 6044af40, 6044af40
+
 Testing generation mode: TestVector = 8484d608
+
 Generation successful: 8484d608, 8484d608
