@@ -55,7 +55,6 @@ module lfsr_tb();
 ////////////////////////////////////////////////////////////////////////////////
     task test_storage(input logic [N-1:0] RandomSeed);
         logic [N-1:0] TestResponse1, TestResponse2;
-        $display("Testing storage mode: RandomSeed = %h", RandomSeed);
         INIT = 0;
         GO = 0;
         SEED = RandomSeed;
@@ -70,7 +69,8 @@ module lfsr_tb();
         #(CLK_PERIOD);
         GO = 0;
         #(CLK_PERIOD);
-        
+        $display("Testing storage mode: RandomSeed = %h", RandomSeed);
+
         TestResponse1 = Q;
         #(CLK_PERIOD);
         TestResponse2 = Q;
