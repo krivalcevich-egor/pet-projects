@@ -45,8 +45,6 @@ Testing sync initialization: TestVector = 12153524
 
 Sync initialization successful: 12153524
 
-Testing storage mode: RandomSeed = 6044af40
-
 Storage mode successful: 6044af40, 6044af40
 
 Testing generation mode: TestVector = 8484d608

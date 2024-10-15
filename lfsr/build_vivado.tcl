@@ -1,4 +1,4 @@
-set project_name "MAC" 
+set project_name "LFSR" 
 
 set project_found [llength [get_projects $project_name]] 
 if {$project_found > 0} { 

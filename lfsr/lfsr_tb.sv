@@ -69,7 +69,6 @@ module lfsr_tb();
         #(CLK_PERIOD);
         GO = 0;
         #(CLK_PERIOD);
-        $display("Testing storage mode: RandomSeed = %h", RandomSeed);
 
         TestResponse1 = Q;
         #(CLK_PERIOD);
