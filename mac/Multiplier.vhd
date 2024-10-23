@@ -29,78 +29,141 @@ end Multiplier;
 architecture Behavioral of Multiplier is
     signal multiplicand    : STD_LOGIC_VECTOR(N-1 downto 0); -- Multiplicand reg
     signal multiplier      : STD_LOGIC_VECTOR(N-1 downto 0); -- Multiplier reg
-    signal partial_product : STD_LOGIC_VECTOR(2*N-1 downto 0);-- Partial product
-    signal extended_multiplicand : STD_LOGIC_VECTOR(N-1 downto 0) 
-                                             := (others => '0'); -- Multiplicand
+    signal pp : STD_LOGIC_VECTOR(2*N-1 downto 0);-- Partial product
     signal count            : integer range 0 to N; -- Counter
     signal state            : STD_LOGIC; -- State signal
 begin
+
+--------------------------------------------------------------------------------
+-- Partial product and state
+-------------------------------------------------------------------------------- 
     process (clk, rst)
     begin                     
         if rising_edge(clk) then
              if rst = '1' then
-                partial_product <= (others => '0');  
-                multiplicand <= (others => '0');     
-                multiplier <= (others => '0');       
-                count <= 0;                          
+                pp <= (others => '0');                                    
                 state <= '0';                        
-                ready <= '0';    
             elsif start_mpy = '1' then
-                    state <= '1';  
-                    ready <= '0';
-                    multiplicand <= A;                   
-                    if B(0) = '1' then -- process first bit to use N clock cycles for Mult
-                        partial_product <=  A(N-1) & 
-                        (partial_product(2*N-1 downto N) + A) &
-                          partial_product(N-1 downto 1);
+                    state <= '1';                   
+                    if B(0) = '1' then
+                        pp <=  A(N-1) & (pp(2*N-1 downto N) + A) 
+                                              & pp(N-1 downto 1);
                     elsif count = 0 then
-                        partial_product <='0' & partial_product(2*N-1 downto 1); 
+                        pp <='0' & pp(2*N-1 downto 1); 
                     else
-                        partial_product <= A(N-1) & 
-                                partial_product(2*N-1 downto 1); 
+                        pp <= A(N-1) & pp(2*N-1 downto 1); 
                     end if;
-                    
-                    multiplier <= '0' & B(N-1 downto 1); 
-                    count <= count + 1;   
-            elsif state = '1' then -- process [N-2: 1] bits                      
+            elsif state = '1' then                         
                 if count < N - 1 then
                     if multiplier(0) = '1' then
-                        partial_product <=  multiplicand(N-1) & 
-                        (partial_product(2*N-1 downto N) + multiplicand) &
-                          partial_product(N-1 downto 1);
+                        pp <=  multiplicand(N-1) & (pp(2*N-1 downto N) + 
+                                            multiplicand) & pp(N-1 downto 1);
                     elsif count = 0 then
-                        partial_product <='0' & partial_product(2*N-1 downto 1); 
+                        pp <='0' & pp(2*N-1 downto 1); 
+                    elsif B = 0 then
+                        pp <= (others => '0');        
                     else
-                        partial_product <= multiplicand(N-1) & 
-                                partial_product(2*N-1 downto 1); 
+                        pp <= multiplicand(N-1) &  pp(2*N-1 downto 1); 
                     end if;
-                    
-                    multiplier <= '0' & multiplier(N-1 downto 1); 
-                    count <= count + 1;                          
-
                 end if;
-                if (count = N - 1) then -- process last bit to use N clock cycles for Mult
+                if (count = N - 1) then
                     if multiplier(0) = '1' then
                         if B(N-1) = '1' then
-                           partial_product <=  (B(N-1) xor A(N-1)) & 
-                            (partial_product(2*N-1 downto N) - multiplicand) &
-                              partial_product(N-1 downto 1);                       
+                           pp <=  (B(N-1) xor A(N-1)) & (pp(2*N-1 downto N) - 
+                                            multiplicand) & pp(N-1 downto 1);                       
                         else 
-                            partial_product <=  multiplicand(N-1) & 
-                            (partial_product(2*N-1 downto N) + multiplicand) &
-                              partial_product(N-1 downto 1);
+                            pp <=  multiplicand(N-1) & (pp(2*N-1 downto N) + 
+                                            multiplicand) & pp(N-1 downto 1);
                          end if;
+                     elsif B = 0 then
+                         pp <= (others => '0');     
                      else
-                         partial_product <= multiplicand(N-1) & 
-                            partial_product(2*N-1 downto 1); 
-                     end if;       
-                    count <= 0;                 
-                    state <= '0'; 
-                    ready <= '1';   
+                         pp <= multiplicand(N-1) &  pp(2*N-1 downto 1); 
+                     end if;                     
+                    state <= '0';   
                 end if;
             end if;
         end if;
     end process;
 
-    product <= partial_product; 
+--------------------------------------------------------------------------------
+-- Output
+-------------------------------------------------------------------------------- 
+    process (clk, rst)
+    begin                     
+        if rising_edge(clk) then
+             if rst = '1' then
+                product <= (others => '0');
+             else
+                product <= pp;  
+             end if;
+        end if;  
+     end process;
+     
+--------------------------------------------------------------------------------
+-- READY flag
+--------------------------------------------------------------------------------    
+    process (clk, rst)
+     begin                     
+         if rising_edge(clk) then
+            if rst = '1' then
+                ready <= '0'; 
+            elsif (count = N - 1) then
+                ready <= '1';
+            else
+                ready <= '0';
+            end if;
+         end if;  
+      end process; 
+
+--------------------------------------------------------------------------------
+-- COUNTER
+--------------------------------------------------------------------------------    
+    process (clk, rst)
+     begin                     
+         if rising_edge(clk) then
+            if rst = '1' then
+                count <= 0; 
+            elsif (count = N - 1) then
+                count <= 0; 
+            elsif (start_mpy = '1' and state = '0') then
+                count <= count + 1;
+            elsif (state = '1') then
+                count <= count + 1;
+            else      
+                count <= 0;
+            end if;
+         end if;  
+      end process; 
+
+--------------------------------------------------------------------------------
+-- Multiplier
+-------------------------------------------------------------------------------- 
+    process (clk, rst)
+    begin                     
+        if rising_edge(clk) then
+             if rst = '1' then
+                multiplier <= (others => '0');
+             elsif (start_mpy = '1') then
+                multiplier <= B(N-1) & B(N-1 downto 1); 
+             else 
+                multiplier <= B(N-1) & multiplier(N-1 downto 1);
+             end if;
+        end if;  
+     end process;
+     
+--------------------------------------------------------------------------------
+-- Multiplicand
+-------------------------------------------------------------------------------- 
+    process (clk, rst)
+    begin                     
+        if rising_edge(clk) then
+             if rst = '1' then
+                multiplicand <= (others => '0'); 
+             else
+                multiplicand <= A;   
+             end if;
+        end if;  
+     end process;      
+                           
 end Behavioral;
